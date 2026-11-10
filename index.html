@@ -1,0 +1,1024 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>歌曲推广模块 交互原型 V1.0</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:"Microsoft YaHei","PingFang SC",sans-serif;background:#f0f2f5;color:#1f2937;font-size:13px}
+.layout{display:flex;min-height:100vh}
+/* sidebar */
+.sidebar{width:200px;background:#1a1a2e;color:#cbd5e1;flex-shrink:0;position:fixed;top:0;bottom:0;left:0;overflow-y:auto;z-index:20}
+.sidebar .logo{padding:18px 16px;font-size:15px;font-weight:700;color:#fff;border-bottom:1px solid #2b2b45}
+.sidebar .logo small{display:block;font-size:11px;color:#8b8ba7;font-weight:400;margin-top:4px}
+.nav-group{padding:10px 0}
+.nav-group .grp{padding:6px 16px;font-size:11px;color:#6b6b8f;letter-spacing:1px}
+.nav-item{padding:9px 16px;cursor:pointer;display:flex;align-items:center;gap:8px;border-left:3px solid transparent;font-size:13px}
+.nav-item:hover{background:#23233c;color:#fff}
+.nav-item.active{background:#2563eb22;border-left-color:#2563eb;color:#fff}
+.nav-item .dot{width:6px;height:6px;border-radius:50%;background:#2563eb;flex-shrink:0}
+.nav-item .badge{margin-left:auto;background:#dc2626;color:#fff;border-radius:9px;font-size:10px;padding:1px 6px}
+.nav-item.hidden{display:none}
+/* main */
+.main{margin-left:200px;flex:1;min-width:0}
+.topbar{background:#fff;border-bottom:1px solid #e5e7eb;padding:0 20px;height:52px;display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:10}
+.topbar h1{font-size:16px;font-weight:700}
+.topbar .crumb{color:#6b7280;font-size:12px}
+.topbar .spacer{flex:1}
+.role-sel{padding:5px 8px;border:1px solid #e5e7eb;border-radius:6px;background:#f9fafb;font-size:12px}
+.user-chip{display:flex;align-items:center;gap:6px;font-size:12px;color:#6b7280}
+.avatar{width:26px;height:26px;border-radius:50%;background:#2563eb;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px}
+.content{padding:16px 20px 40px}
+.page-view{display:none}
+.page-view.active{display:block}
+/* cards & boxes */
+.card{background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:14px 16px;margin-bottom:14px}
+.card h3{font-size:14px;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.card h3 .sub{font-size:11px;color:#6b7280;font-weight:400}
+.info-box{border-left:4px solid;border-radius:6px;padding:9px 12px;margin-bottom:12px;font-size:12px;line-height:1.7}
+.info-box.blue{border-color:#2563eb;background:#eff6ff}
+.info-box.green{border-color:#059669;background:#ecfdf5}
+.info-box.orange{border-color:#d97706;background:#fffbeb}
+.info-box.purple{border-color:#7c3aed;background:#f5f3ff}
+.info-box.red{border-color:#dc2626;background:#fef2f2}
+/* filter bar */
+.filter-bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}
+.filter-bar label{font-size:12px;color:#6b7280}
+.filter-bar input,.filter-bar select{padding:6px 8px;border:1px solid #e5e7eb;border-radius:6px;font-size:12px;background:#fff;min-width:110px}
+.btn{padding:6px 14px;border-radius:6px;border:1px solid #e5e7eb;background:#fff;cursor:pointer;font-size:12px}
+.btn:hover{border-color:#2563eb;color:#2563eb}
+.btn.primary{background:#2563eb;border-color:#2563eb;color:#fff}
+.btn.primary:hover{background:#1d4ed8}
+.btn.green{background:#059669;border-color:#059669;color:#fff}
+.btn.warn{background:#d97706;border-color:#d97706;color:#fff}
+.btn.sm{padding:3px 9px;font-size:11px}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+/* stat cards */
+.stat-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:12px}
+.stat-card{background:#fff;border:1px solid #e5e7eb;border-top:3px solid #2563eb;border-radius:8px;padding:10px 12px}
+.stat-card .lb{font-size:11px;color:#6b7280}
+.stat-card .vl{font-size:20px;font-weight:700;margin-top:2px;color:#1f2937}
+.stat-card .dl{font-size:11px;margin-top:2px;color:#6b7280}
+.stat-card.blue{border-top-color:#2563eb}.stat-card.blue .vl{color:#2563eb}
+.stat-card.green{border-top-color:#059669}.stat-card.green .vl{color:#059669}
+.stat-card.orange{border-top-color:#d97706}.stat-card.orange .vl{color:#d97706}
+.stat-card.purple{border-top-color:#7c3aed}.stat-card.purple .vl{color:#7c3aed}
+.stat-card.cyan{border-top-color:#0891b2}.stat-card.cyan .vl{color:#0891b2}
+.stat-card.red{border-top-color:#dc2626}.stat-card.red .vl{color:#dc2626}
+.up{color:#059669}.down{color:#dc2626}
+/* chips */
+.chips{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
+.chip{padding:3px 10px;border-radius:12px;border:1px solid #e5e7eb;background:#fff;cursor:pointer;font-size:11px;color:#6b7280}
+.chip.active{background:#2563eb;border-color:#2563eb;color:#fff}
+/* tags & status */
+.tag{display:inline-block;padding:1px 8px;border-radius:10px;font-size:11px;margin-right:4px}
+.tag-blue{background:#eff6ff;color:#2563eb}.tag-green{background:#ecfdf5;color:#059669}
+.tag-purple{background:#f5f3ff;color:#7c3aed}.tag-cyan{background:#ecfeff;color:#0891b2}
+.tag-pink{background:#fdf2f8;color:#db2777}.tag-orange{background:#fffbeb;color:#d97706}
+.tag-gray{background:#f3f4f6;color:#6b7280}
+.status{display:inline-flex;align-items:center;gap:5px;padding:2px 9px;border-radius:10px;font-size:11px}
+.status::before{content:"";width:6px;height:6px;border-radius:50%}
+.status-active{background:#ecfdf5;color:#059669}.status-active::before{background:#059669}
+.status-pending{background:#eff6ff;color:#2563eb}.status-pending::before{background:#2563eb}
+.status-done{background:#f3f4f6;color:#6b7280}.status-done::before{background:#9ca3af}
+.status-expired{background:#fffbeb;color:#d97706}.status-expired::before{background:#d97706}
+.status-off{background:#fef2f2;color:#dc2626}.status-off::before{background:#dc2626}
+/* table */
+.scroll-x{overflow-x:auto}
+table.tbl{width:100%;border-collapse:collapse;font-size:12px;min-width:900px}
+table.tbl th{background:#f9fafb;color:#6b7280;font-weight:600;text-align:left;padding:8px 10px;border-bottom:1px solid #e5e7eb;white-space:nowrap}
+table.tbl td{padding:8px 10px;border-bottom:1px solid #f1f5f9;white-space:nowrap}
+table.tbl tr:hover td{background:#f8fafc}
+table.tbl tr.clickable{cursor:pointer}
+.link{color:#2563eb;cursor:pointer;text-decoration:none}
+.link:hover{text-decoration:underline}
+.pager{display:flex;gap:8px;align-items:center;justify-content:flex-end;margin-top:10px;font-size:12px;color:#6b7280}
+/* drawer */
+.drawer-mask{position:fixed;inset:0;background:#0006;display:none;z-index:40}
+.drawer{position:fixed;top:0;right:-640px;width:640px;max-width:96vw;height:100vh;background:#fff;z-index:41;box-shadow:-4px 0 20px #0002;transition:right .25s;overflow-y:auto;padding:18px 20px}
+.drawer.open{right:0}
+.drawer h3{font-size:15px;margin-bottom:4px}
+.drawer .close{float:right;cursor:pointer;color:#6b7280;font-size:18px}
+/* modal */
+.modal-mask{position:fixed;inset:0;background:#0007;display:none;align-items:center;justify-content:center;z-index:50}
+.modal-mask.open{display:flex}
+.modal{background:#fff;border-radius:10px;width:520px;max-width:94vw;max-height:86vh;overflow-y:auto;padding:18px 20px}
+.modal h3{font-size:15px;margin-bottom:12px}
+.form-row{display:flex;gap:10px;margin-bottom:10px;align-items:center}
+.form-row label{width:96px;font-size:12px;color:#6b7280;flex-shrink:0}
+.form-row input,.form-row select{flex:1;padding:7px 9px;border:1px solid #e5e7eb;border-radius:6px;font-size:12px}
+.form-row input:disabled{background:#f3f4f6;color:#9ca3af}
+/* wizard */
+.wiz-bar{display:flex;align-items:center;gap:0;margin-bottom:16px}
+.wiz-step{display:flex;align-items:center;gap:8px}
+.wiz-step .no{width:26px;height:26px;border-radius:50%;background:#e5e7eb;color:#6b7280;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700}
+.wiz-step .tt{font-size:12px;color:#6b7280}
+.wiz-step.active .no{background:#2563eb;color:#fff}
+.wiz-step.active .tt{color:#2563eb;font-weight:700}
+.wiz-step.done .no{background:#059669;color:#fff}
+.wiz-line{flex:1;height:2px;background:#e5e7eb;margin:0 10px;min-width:30px}
+.wiz-panel{display:none}
+.wiz-panel.active{display:block}
+.pick-row{display:flex;align-items:center;gap:10px;padding:8px 10px;border:1px solid #e5e7eb;border-radius:6px;margin-bottom:8px;cursor:pointer}
+.pick-row:hover{border-color:#2563eb}
+.pick-row.sel{border-color:#2563eb;background:#eff6ff}
+.pick-row.dis{opacity:.55;cursor:not-allowed}
+/* charts */
+.chart-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+.chart-box{border:1px solid #e5e7eb;border-radius:8px;padding:10px}
+.chart-box .ct{font-size:12px;color:#6b7280;margin-bottom:6px;display:flex;justify-content:space-between}
+.bar-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:11px}
+.bar-row .bl{width:64px;color:#6b7280;flex-shrink:0}
+.bar-row .bt{flex:1;background:#f1f5f9;border-radius:4px;height:12px;overflow:hidden}
+.bar-row .bf{height:100%;border-radius:4px}
+.bar-row .bv{width:40px;text-align:right;color:#1f2937}
+/* profile head */
+.prof-head{display:flex;gap:16px;align-items:center}
+.prof-ava{width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#2563eb,#7c3aed);color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700}
+.prof-meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px 20px;margin-top:10px;font-size:12px}
+.prof-meta .k{color:#6b7280}
+/* toast */
+.toast{position:fixed;top:64px;left:50%;transform:translateX(-50%);background:#1f2937;color:#fff;padding:9px 18px;border-radius:8px;font-size:12px;z-index:60;display:none;box-shadow:0 4px 14px #0004}
+.toast.ok{background:#059669}.toast.err{background:#dc2626}.toast.warn{background:#d97706}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:6px 18px;font-size:12px}
+.grid2 .k{color:#6b7280}
+.muted{color:#6b7280}
+.mt8{margin-top:8px}.mt12{margin-top:12px}.mb8{margin-bottom:8px}
+.flex{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.right{margin-left:auto}
+
+/* ===== V1.1 新增：推广任务投放明细与视频自动追踪 ===== */
+.dtabs{display:flex;gap:2px;border-bottom:2px solid #e5e7eb;margin-bottom:14px}
+.dtab{padding:8px 16px;cursor:pointer;font-size:13px;font-weight:600;color:#6b7280;border-bottom:2px solid transparent;margin-bottom:-2px}
+.dtab:hover{color:#2563eb}
+.dtab.active{color:#2563eb;border-bottom-color:#2563eb}
+.dpanel{display:none}.dpanel.active{display:block}
+.tk{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;white-space:nowrap}
+.tk::before{content:'';width:6px;height:6px;border-radius:50%;background:currentColor}
+.tk-run{background:#dbeafe;color:#1e40af}.tk-idle{background:#f3f4f6;color:#6b7280}
+.tk-done{background:#d1fae5;color:#065f46}.tk-err{background:#fee2e2;color:#991b1b}
+.tk-wait{background:#fef3c7;color:#92400e}
+.sumbar{display:flex;gap:20px;align-items:center;background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:10px 14px;margin-top:10px;font-size:12px;flex-wrap:wrap}
+.sumbar b{font-size:14px}
+.dhead,.dline{display:grid;grid-template-columns:160px minmax(240px,1fr) 150px 84px 104px 150px 26px;gap:8px;align-items:start}
+.dhead{font-size:11px;font-weight:700;color:#6b7280;margin-bottom:5px;align-items:center}
+.dline{margin-bottom:9px}
+.dline input,.dline select{width:100%;padding:6px 8px;border:1px solid #d1d5db;border-radius:6px;font-size:12px;font-family:inherit}
+.dline input:focus,.dline select:focus{outline:none;border-color:#2563eb}
+.dline input[readonly]{background:#f3f4f6;color:#4b5563;cursor:not-allowed}
+.dline .pmsg{font-size:10px;line-height:1.5;margin-top:3px}
+.pill{display:inline-block;padding:1px 7px;border-radius:9px;font-size:11px;font-weight:600;white-space:nowrap}
+.pill-ok{background:#d1fae5;color:#065f46}.pill-err{background:#fee2e2;color:#991b1b}
+.pill-warn{background:#fef3c7;color:#92400e}.pill-gray{background:#f3f4f6;color:#6b7280}
+.bar{height:6px;background:#e5e7eb;border-radius:3px;overflow:hidden;min-width:80px}
+.bar i{display:block;height:100%;background:#059669}
+.bar i.warn{background:#d97706}.bar i.over{background:#dc2626}
+.vlink{color:#2563eb;cursor:pointer;word-break:break-all;font-size:11px}
+.vlink:hover{text-decoration:underline}
+.hotflag{color:#dc2626;font-weight:700}
+.kvgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px 18px}
+.kvgrid .k{font-size:11px;color:#6b7280}
+.kvgrid .v{font-size:13px;font-weight:600;margin-top:2px}
+.lock{font-size:11px;color:#7c3aed;font-weight:600}
+</style>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="logo">乐忆版权服务平台<small>歌曲推广模块 · 原型 V1.2</small></div>
+    <div class="nav-group">
+      <div class="grp">推广管理</div>
+      <div class="nav-item active" data-page="task"><span class="dot"></span>推广任务</div>
+      <div class="nav-item" data-page="song"><span class="dot"></span>歌曲（推广歌曲）</div>
+      <div class="nav-item" data-page="hot"><span class="dot"></span>热门歌曲<span class="badge" id="hotBadge">4</span></div>
+      <div class="grp">基础配套</div>
+      <div class="nav-item" data-page="admin" id="navAdmin"><span class="dot"></span>基础数据维护</div>
+    </div>
+  </aside>
+  <div class="main">
+    <header class="topbar">
+      <h1 id="pageTitle">推广任务</h1>
+      <span class="crumb" id="pageCrumb">推广管理 / 防重控制 + 投放计划派生源</span>
+      <div class="spacer"></div>
+      <select class="role-sel" id="roleSel" onchange="switchRole(this.value)">
+        <option value="admin">管理/授权人员（全量）</option>
+        <option value="asset">资管同事</option>
+        <option value="rep">推广业务员 · 王小辉</option>
+      </select>
+      <div class="user-chip"><div class="avatar" id="userAva">管</div><span id="userName">管理员</span></div>
+    </header>
+    <div class="content">
+
+      <!-- ============ 歌曲（推广歌曲） ============ -->
+      <div class="page-view" id="page-song">
+        <div class="info-box green">歌曲粒度明细：不选筛选项时默认以推广业务员为区分；默认点赞量最高优先；超过推广截止日期仍未绑定推广合同的记录打 <span class="status status-expired">已过期·待绑合同</span> 标记；视频下架记录冻结数据并留痕存证。呈现形式＝表格＋趋势图组合。</div>
+        <div class="filter-bar">
+          <label>歌曲</label><select id="sSongSel"></select>
+          <label>业务员</label><select id="sExec"><option value="">全部（按业务员区分）</option></select>
+          <label>执行账号</label><select id="sAcc"><option value="">全部</option></select>
+          <button class="btn primary" onclick="renderSong()">查询</button>
+          <button class="btn right" onclick="toast('已导出歌曲明细（含推广链接/投放记录链接存证列）','ok')">导出</button>
+        </div>
+        <div class="stat-row" id="songCards"></div>
+        <div class="card">
+          <h3>单曲每天各项数据趋势图 <span class="sub">日快照 · 近 7 天</span></h3>
+          <div class="chart-grid" id="songCharts"></div>
+        </div>
+        <div class="card">
+          <h3>账号级推广明细 <span class="sub">每行＝歌曲×平台×执行账号×期间 的投放记录</span></h3>
+          <div class="scroll-x"><table class="tbl" id="songTable"></table></div>
+        </div>
+      </div>
+
+      <!-- ============ 推广任务 ============ -->
+      <div class="page-view active" id="page-task">
+        <div id="taskListView">
+          <div class="info-box blue"><b>V1.1 变更</b>：推广任务 ＝ <b>防重控制单元 ＋ 投放计划派生源</b>。创建任务时录入「<b>视频链接（必填）</b>＋<b>推广金额</b>」，链接<b>自动反查执行账号与业务员</b>；保存后<b>自动派生投放记录并启动追踪引擎</b>，无需二次导入。绑定推广合同后<b>周期与推广预算</b>同步合同并只读。<br>
+          <span class="muted">原「业务导入执行数据」路径<b>保留</b>（task_id 为空），用于历史补录与第三方代投回传；投放记录始终是唯一事实源。</span></div>
+          <div class="stat-row" id="taskStats"></div>
+          <div class="flex mb8"><button class="btn primary" onclick="openTaskWizard()">＋ 创建任务</button>
+            <button class="btn" onclick="toast('模板已新增「视频链接」「推广金额」两列','ok')">下载导入模板</button>
+            <span class="muted" style="font-size:12px">校验：a) 任务名称唯一　b) 同歌同平台同期间不重复　c) Σ实际金额 ≤ 推广预算　d) 合同已分配 ≤ 合同金额</span></div>
+          <div class="card"><div class="scroll-x"><table class="tbl" id="taskTable"></table></div></div>
+        </div>
+
+        <div id="taskWizardView" style="display:none">
+          <div class="wiz-bar">
+            <div class="wiz-step active" id="ws1"><div class="no">1</div><div class="tt">基本信息与预算</div></div>
+            <div class="wiz-line"></div>
+            <div class="wiz-step" id="ws2"><div class="no">2</div><div class="tt">投放明细（视频链接×金额）</div></div>
+            <div class="wiz-line"></div>
+            <div class="wiz-step" id="ws3"><div class="no">3</div><div class="tt">确认提交</div></div>
+          </div>
+
+          <div class="wiz-panel active" id="wp1">
+            <div class="card">
+              <div class="form-row"><label>任务名称 *</label><input id="wName" placeholder="全局唯一，如：抖音5月推广-第一批"></div>
+              <div class="form-row"><label>推广平台 *</label><select id="wPlat" onchange="onWizPlatChange()"><option>抖音</option><option>快手</option><option>酷狗</option></select></div>
+              <div class="form-row"><label>推广开始 *</label><input type="date" id="wStart" value="2024-05-01"></div>
+              <div class="form-row"><label>推广结束 *</label><input type="date" id="wEnd" value="2024-05-31"></div>
+              <div class="form-row"><label>关联推广合同</label><select id="wTg" onchange="onWizTg(this.value)">
+                <option value="">不绑定（手工周期与预算）</option>
+                <option value="TG00009">TG00009 · 供应商AD001 · 2024-04-01~2024-04-30 · 合同金额 ¥120,000</option>
+                <option value="TG00010">TG00010 · 供应商AD002 · 2024-05-01~2024-05-31 · 合同金额 ¥50,000</option></select></div>
+              <div class="form-row"><label>推广预算 *（元）</label><input type="number" id="wBudget" placeholder="0.00" value="80000" oninput="renderDetailSummary()">
+                <div class="muted" style="font-size:11px;margin-top:3px" id="wBudgetHint">任务层预算做<b>总额控制</b>；投放明细层填<b>单条实际金额</b>做结算与单视频 ROI（金额双层模型）。</div></div>
+              <div class="info-box orange" id="wTgNote" style="display:none">已绑定推广合同：<b>推广周期与推广预算</b>同步为合同值并置为只读；合同变更时联动更新（决策四扩展）。<span class="lock">🔒 金额来源：合同同步</span></div>
+              <div class="info-box orange" id="wTgMulti" style="display:none">⚠️ 本合同已绑定 <b>2</b> 个任务。预算为<b>合同全额共享</b>，系统按「合同已分配额度」做超发阻断，请关注累计占用。</div>
+            </div>
+            <div class="flex"><button class="btn primary" onclick="wizNext(2)">下一步</button><button class="btn" onclick="closeTaskWizard()">取消</button></div>
+          </div>
+
+          <div class="wiz-panel" id="wp2">
+            <div class="card">
+              <h3>投放明细录入 <span class="sub">视频链接必填 → 失焦自动解析 video_id → 反查执行账号 → 带出业务员</span></h3>
+              <div class="info-box cyan" style="border-color:#0891b2;background:#ecfeff;margin-bottom:10px">
+                执行账号由链接<b>自动反查且只读</b>，不可手工改写（防止链接与账号错配）。反查账号须已在「基础数据维护（资管）」登记，否则该行阻断并提供快捷跳转。
+              </div>
+              <div id="wizDetailLines"></div>
+              <div class="flex mt8">
+                <button class="btn primary sm" onclick="addDetailLine()">＋ 添加明细行</button>
+                <button class="btn sm" onclick="fillDemoLines()">填充示例（3 行）</button>
+                <button class="btn sm" onclick="fillBadLine()">填充异常示例（演示校验）</button>
+                <button class="btn sm" onclick="simTemplateImport()">模板批量导入</button>
+              </div>
+              <div class="sumbar" id="wizDetailSum"></div>
+              <div id="wizImportResult" class="mt8"></div>
+            </div>
+            <div class="card">
+              <h3>歌曲来源说明</h3>
+              <div class="info-box red" style="margin-bottom:0">草稿状态歌曲不支持导入（决策六）；已导入歌曲被删除/转草稿时标记"源歌曲失效"，不物理删除。同歌同平台同期间重复将被拦截（规则 b），加推场景以<b>不同视频链接</b>区分投放记录（V1.1 粒度已含 video_id，不再撞唯一键）。</div>
+            </div>
+            <div class="flex"><button class="btn" onclick="wizNext(1)">上一步</button><button class="btn primary" onclick="wizNext(3)">下一步</button></div>
+          </div>
+
+          <div class="wiz-panel" id="wp3">
+            <div class="card"><h3>提交校验</h3><div id="wizCheck"></div></div>
+            <div class="card"><h3>任务摘要</h3><div id="wizSummary"></div></div>
+            <div class="card"><h3>保存后将自动执行</h3>
+              <div class="info-box green" style="margin-bottom:0">① 逐行派生 <b>promo_delivery</b> 投放记录（source_type=任务派生，回填 task_id）→ ② 按起始日期判定 <b>待执行 / 执行中</b> → ③ 链接解析通过且账号已登记的行<b>立即启动追踪引擎</b>（小时快照 + 日快照，按 video_id 抓取）→ ④ 投放记录进入总页面 / 业务员视角 / 热门判定，<b>无需二次导入</b>。</div>
+            </div>
+            <div class="flex"><button class="btn" onclick="wizNext(2)">上一步</button>
+              <button class="btn" onclick="saveTaskDraft()">存为草稿</button>
+              <button class="btn green" onclick="submitTask()">保存并启动追踪</button></div>
+          </div>
+        </div>
+
+        <div id="taskDetailView" style="display:none">
+          <div class="flex mb8"><button class="btn" onclick="backTaskList()">← 返回任务列表</button><span id="taskDetailTitle" style="font-weight:700"></span></div>
+          <div class="card" id="taskOverview"></div>
+          <div class="dtabs">
+            <div class="dtab active" onclick="taskTab(0,this)">投放明细与追踪数据</div>
+            <div class="dtab" onclick="taskTab(1,this)">任务歌曲清单</div>
+            <div class="dtab" onclick="taskTab(2,this)">抓取异常</div>
+          </div>
+          <div class="dpanel active" id="tdp0"></div>
+          <div class="dpanel" id="tdp1"></div>
+          <div class="dpanel" id="tdp2"></div>
+        </div>
+      </div>
+
+      <!-- ============ 热门歌曲 ============ -->
+      <div class="page-view" id="page-hot">
+        <div id="hotListView">
+          <div class="info-box red">热门判定：以账号为维度，单个账号下歌曲在<b>一个小时内点赞增量超过 2000</b>（配置项）即为热门；以小时为节点每超一次记录一次上榜，同一天可有多次。预警动作：① 本板块展示；② 弹窗/站内信通知负责推广该歌曲的业务员。</div>
+          <div class="stat-row" id="hotCards"></div>
+          <div class="card">
+            <h3>热门歌曲榜 <span class="sub">默认按上榜次数由高到低 · 指标默认展示进入热门后实时数量，悬浮查看总量</span></h3>
+            <div class="scroll-x"><table class="tbl" id="hotTable"></table></div>
+          </div>
+        </div>
+        <div id="hotDetailView" style="display:none">
+          <div class="flex mb8"><button class="btn" onclick="backHotList()">← 返回热门榜</button><span id="hotDetailTitle" style="font-weight:700"></span></div>
+          <div class="info-box blue">上榜详情：以推广平台为维度记录每个账号每次上榜时间（每小时记录一次）；同一时间多平台上榜展示全部平台，不随机取一（决策红3）。</div>
+          <div class="card"><div class="scroll-x"><table class="tbl" id="hotDetailTable"></table></div></div>
+        </div>
+      </div>
+
+      <!-- ============ 基础数据维护 ============ -->
+      <div class="page-view" id="page-admin">
+        <div class="info-box orange">资管维护：执行账号主数据（导入校验依赖）、业务员-账号管理关系、合同/歌曲绑定；删除仅针对错误数据并留操作日志。</div>
+        <div class="card">
+          <h3>执行账号主数据 <span class="sub">绑定后跳转链路生效；未绑定显示"—"</span></h3>
+          <div class="flex mb8"><button class="btn primary sm" onclick="toast('新增执行账号（业务提供四要素）')">＋ 新增账号</button>
+          <button class="btn sm" onclick="toast('导入账号模板已下载','ok')">模板导入</button></div>
+          <div class="scroll-x"><table class="tbl" id="adminAccTable"></table></div>
+        </div>
+        <div class="card">
+          <h3>投放记录绑定台账 <span class="sub">编辑→绑定采购合同/推广合同/业务员→保存提交；绑定后合同周期回写并消除过期标记</span></h3>
+          <div class="scroll-x"><table class="tbl" id="adminBindTable"></table></div>
+        </div>
+        <div class="card">
+          <h3>操作日志</h3>
+          <div class="scroll-x"><table class="tbl" id="adminLogTable"></table></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- 明细抽屉 -->
+<div class="drawer-mask" id="drawerMask" onclick="closeDrawer()"></div>
+<div class="drawer" id="drawer"></div>
+<!-- 绑定弹窗 -->
+<div class="modal-mask" id="modalMask">
+  <div class="modal">
+    <h3 id="modalTitle">绑定/编辑</h3>
+    <div id="modalBody"></div>
+    <div class="flex" style="justify-content:flex-end;margin-top:14px">
+      <button class="btn" onclick="closeModal()">取消</button>
+      <button class="btn primary" onclick="saveModal()">保存提交</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toastEl"></div>
+
+<script>
+/* ================= 模拟数据 ================= */
+const SONGS = {
+  A002001:{name:'夜航星', performer:'林小满', version:'录音室版'},
+  A002005:{name:'山风来信', performer:'陈屿', version:'录音室版'},
+  A002009:{name:'霓虹甜心', performer:'苏晴', version:'DJ版'},
+  A002013:{name:'旧巷夏天', performer:'白泽', version:'录音室版'},
+  A002020:{name:'雾岛', performer:'沈栖', version:'草稿', draft:true},
+};
+const ACCOUNTS = [
+  {id:'AP100001', name:'FFSDF', platform:'抖音', fans:53253, likes:2432, region:'深圳', owner:'张丽君'},
+  {id:'AP100002', name:'FDFEE', platform:'抖音', fans:345353, likes:5466, region:'广州', owner:'王小辉'},
+  {id:'AP100003', name:'FEFEF', platform:'抖音', fans:35334, likes:86756, region:'青海', owner:'郭媛'},
+  {id:'AP100004', name:'FEEFRR', platform:'抖音', fans:5454, likes:7878, region:'北京', owner:'韩宇'},
+];
+const accOf = id => ACCOUNTS.find(a=>a.id===id);
+/* 推广投放记录：歌曲×平台×执行账号×期间（最小事实粒度） */
+let DELIVERIES = [
+  {id:1, song:'A002001', platform:'抖音', account:'AP100001', period:'2024-04-01~2024-04-30', status:'执行中', tg:'TG00002', kj:'KJ000001', m:[268224,257428,262665,251954], videos:2, videoStatus:'在架'},
+  {id:2, song:'A002001', platform:'抖音', account:'AP100002', period:'2024-04-01~2024-04-30', status:'执行中', tg:'TG00002', kj:'KJ000001', m:[262131,261001,263199,253583], videos:1, videoStatus:'在架'},
+  {id:3, song:'A002001', platform:'抖音', account:'AP100003', period:'2024-04-01~2024-04-30', status:'执行中', tg:'TG00002', kj:'KJ000001', m:[258279,261718,261648,268023], videos:2, videoStatus:'在架'},
+  {id:4, song:'A002001', platform:'抖音', account:'AP100004', period:'2024-04-01~2024-04-30', status:'执行中', tg:'TG00002', kj:'KJ000001', m:[266484,265881,260157,256105], videos:1, videoStatus:'在架'},
+  {id:5, song:'A002005', platform:'抖音', account:'AP100001', period:'2024-04-01~2024-04-30', status:'执行中', tg:'TG00005', kj:'KJ000001', m:[120331,118220,121455,117802], videos:2, videoStatus:'在架'},
+  {id:6, song:'A002005', platform:'抖音', account:'AP100002', period:'2024-04-01~2024-04-10', status:'执行中', tg:'', kj:'KJ000001', m:[98220,96110,99340,95210], videos:1, videoStatus:'在架', expired:true},
+  {id:7, song:'A002005', platform:'抖音', account:'AP100003', period:'2024-04-01~2024-04-30', status:'执行中', tg:'TG00007', kj:'KJ000001', m:[105410,104320,106120,103240], videos:1, videoStatus:'在架'},
+  {id:8, song:'A002005', platform:'抖音', account:'AP100004', period:'2024-04-01~2024-04-30', status:'执行中', tg:'TG00008', kj:'KJ000001', m:[99870,98760,100230,97650], videos:2, videoStatus:'在架'},
+  {id:9, song:'A002009', platform:'抖音', account:'AP100001', period:'2024-04-01~2024-04-30', status:'执行中', tg:'TG00001', kj:'KJ000002', m:[88420,86310,89120,85230], videos:1, videoStatus:'在架'},
+  {id:10, song:'A002009', platform:'抖音', account:'AP100002', period:'2024-04-01~2024-04-30', status:'执行中', tg:'TG00002', kj:'KJ000002', m:[91230,89120,92010,88340], videos:2, videoStatus:'在架'},
+  {id:11, song:'A002009', platform:'抖音', account:'AP100003', period:'2024-04-01~2024-04-20', status:'执行完成', tg:'TG00003', kj:'KJ000002', m:[76540,74430,77210,73320], videos:1, videoStatus:'已下架'},
+  {id:12, song:'A002009', platform:'抖音', account:'AP100004', period:'2024-04-01~2024-04-30', status:'执行中', tg:'TG00004', kj:'KJ000002', m:[82110,80020,82890,79130], videos:1, videoStatus:'在架'},
+  {id:13, song:'A002013', platform:'抖音', account:'AP100001', period:'2024-04-01~2024-04-30', status:'执行中', tg:'TG00005', kj:'KJ000002', m:[64320,62210,65010,61120], videos:1, videoStatus:'在架'},
+  {id:14, song:'A002013', platform:'抖音', account:'AP100002', period:'2024-04-01~2024-04-30', status:'执行中', tg:'TG00006', kj:'KJ000002', m:[67540,65430,68220,64330], videos:2, videoStatus:'在架'},
+  {id:15, song:'A002013', platform:'抖音', account:'AP100003', period:'2024-04-01~2024-04-30', status:'执行中', tg:'TG00007', kj:'KJ000002', m:[61230,59120,61910,58030], videos:1, videoStatus:'在架'},
+  {id:16, song:'A002013', platform:'抖音', account:'AP100004', period:'2024-05-01~2024-05-31', status:'待执行', tg:'TG00008', kj:'KJ000002', m:[0,0,0,0], videos:0, videoStatus:'—'},
+];
+const execOfDelivery = d => accOf(d.account).owner;
+let TASKS = [
+  {id:'T20240401', name:'抖音4月推广-第一批', platform:'抖音', start:'2024-04-01', end:'2024-04-30', tg:'TG00009',
+   creator:'张丽君', budget:120000, amountSource:'contract', contractAmount:120000, trackStatus:'追踪中',
+   songs:[['A002001','成功',''],['A002005','成功',''],['A002009','成功',''],['A002013','成功','']],
+   details:[
+    {song:'A002001', vid:'7351234567890123456', url:'https://www.douyin.com/video/7351234567890123456', account:'AP100001', accountName:'FFSDF', executor:'张丽君', amount:18000, m:[268224,257428,262665,251954], plays:1820433, inc:3210, ratio:2.4, hot:true,  track:'追踪中', crawl:'2024-04-02 16:00', fail:0, parse:'解析成功'},
+    {song:'A002001', vid:'7351234567890987654', url:'https://www.douyin.com/video/7351234567890987654', account:'AP100002', accountName:'FDFEE', executor:'王小辉', amount:15000, m:[262131,261001,263199,253583], plays:1654210, inc:2870, ratio:1.8, hot:true,  track:'追踪中', crawl:'2024-04-02 16:00', fail:0, parse:'解析成功'},
+    {song:'A002005', vid:'7352234567890111222', url:'https://www.douyin.com/video/7352234567890111222', account:'AP100001', accountName:'FFSDF', executor:'张丽君', amount:12000, m:[120331,118220,121455,117802], plays:980120,  inc:2450, ratio:3.1, hot:true,  track:'追踪中', crawl:'2024-04-02 16:00', fail:0, parse:'解析成功'},
+    {song:'A002005', vid:'7352234567890333444', url:'https://www.douyin.com/video/7352234567890333444', account:'AP100003', accountName:'FEFEF', executor:'郭媛',   amount:16000, m:[105410,104320,106120,103240], plays:870330, inc:1180, ratio:-0.6, hot:false, track:'追踪中', crawl:'2024-04-02 16:00', fail:0, parse:'解析成功'},
+    {song:'A002009', vid:'7353234567890555666', url:'https://www.douyin.com/video/7353234567890555666', account:'AP100002', accountName:'FDFEE', executor:'王小辉', amount:20000, m:[91230,89120,92010,88340], plays:1230900, inc:2260, ratio:1.2, hot:false, track:'追踪中', crawl:'2024-04-02 16:00', fail:0, parse:'解析成功'},
+    {song:'A002013', vid:'7354234567890777888', url:'https://www.douyin.com/video/7354234567890777888', account:'AP100004', accountName:'FEEFRR', executor:'韩宇', amount:9000, m:[64320,62210,65010,61120], plays:410220, inc:0, ratio:0, hot:false, track:'已停止', crawl:'2024-04-01 23:00', fail:0, parse:'解析成功'}
+   ]},
+  {id:'T20240402', name:'抖音4月推广-第二批', platform:'抖音', start:'2024-04-08', end:'2024-05-08', tg:'',
+   creator:'王小辉', budget:50000, amountSource:'manual', contractAmount:null, trackStatus:'部分异常',
+   songs:[['A002005','成功',''],['A002020','失败','草稿状态歌曲不支持导入']],
+   details:[
+    {song:'A002005', vid:'7355234567890222333', url:'https://www.douyin.com/video/7355234567890222333', account:'AP100003', accountName:'FEFEF', executor:'郭媛', amount:12000, m:[98220,96110,99340,95210], plays:720110, inc:2105, ratio:5.2, hot:true, track:'追踪中', crawl:'2024-04-02 16:00', fail:0, parse:'解析成功'},
+    {song:'A002013', vid:'7356234567890444555', url:'https://www.douyin.com/video/7356234567890444555', account:'AP100004', accountName:'FEEFRR', executor:'韩宇', amount:16000, m:[67540,65430,68220,64330], plays:0, inc:0, ratio:0, hot:false, track:'抓取异常', crawl:'2024-04-02 11:00', fail:3, parse:'解析成功', errMsg:'连续 3 次抓取失败：平台返回 403（疑似视频转为私密）'}
+   ]},
+  {id:'T20240303', name:'抖音3月推广-收尾', platform:'抖音', start:'2024-03-01', end:'2024-03-31', tg:'TG00010',
+   creator:'郭媛', budget:50000, amountSource:'contract', contractAmount:50000, trackStatus:'已完成',
+   songs:[['A002009','成功','']],
+   details:[
+    {song:'A002009', vid:'7357234567890666777', url:'https://www.douyin.com/video/7357234567890666777', account:'AP100003', accountName:'FEFEF', executor:'郭媛', amount:22000, m:[76540,74430,77210,73320], plays:690450, inc:0, ratio:0, hot:false, track:'已停止', crawl:'2024-03-31 23:00', fail:0, parse:'解析成功'}
+   ]}
+];
+const HOT = [
+  {song:'A002005', m:[10000,9000,8000,7000], accounts:4, status:'执行中', platform:'抖音', rankTime:'2024-04-02 15:00', rankChange:-1, inc:[3011,3011,3011,3011], accChange:-1, rankCount:6},
+  {song:'A002001', m:[11000,5000,5000,6000], accounts:4, status:'执行中', platform:'抖音', rankTime:'2024-04-02 15:00', rankChange:-3, inc:[2133,3121,3011,3011], accChange:1, rankCount:5},
+  {song:'A002013', m:[12100,4000,4300,4000], accounts:4, status:'执行中', platform:'抖音', rankTime:'2024-04-02 14:00', rankChange:3, inc:[2100,4011,3011,3011], accChange:1, rankCount:4},
+  {song:'A002009', m:[60000,3500,3400,3000], accounts:3, status:'执行中', platform:'抖音、快手', rankTime:'2024-04-02 13:00', rankChange:1, inc:[2000,2011,3011,3011], accChange:-2, rankCount:3},
+];
+const HOT_DETAIL = {
+  A002005:[['抖音','AP100001','张丽君','2024-04-02 15:00',3210],['抖音','AP100002','王小辉','2024-04-02 15:00',2870],['抖音','AP100003','郭媛','2024-04-02 14:00',2450],['抖音','AP100004','韩宇','2024-04-02 13:00',2210],['抖音','AP100001','张丽君','2024-04-02 12:00',2105],['抖音','AP100002','王小辉','2024-04-02 11:00',2044]],
+  A002001:[['抖音','AP100001','张丽君','2024-04-02 15:00',2600],['抖音','AP100003','郭媛','2024-04-02 14:00',2380],['抖音','AP100002','王小辉','2024-04-02 13:00',2260],['抖音','AP100004','韩宇','2024-04-02 12:00',2140],['抖音','AP100001','张丽君','2024-04-02 10:00',2010]],
+  A002013:[['抖音','AP100002','王小辉','2024-04-02 14:00',2900],['抖音','AP100001','张丽君','2024-04-02 13:00',2500],['抖音','AP100003','郭媛','2024-04-02 12:00',2200],['抖音','AP100004','韩宇','2024-04-02 11:00',2050]],
+  A002009:[['抖音','AP100001','张丽君','2024-04-02 13:00',3400],['快手','AP100002','王小辉','2024-04-02 13:00',2800],['抖音','AP100004','韩宇','2024-04-02 12:00',2100]],
+};
+const LOGS = [
+  ['2024-04-02 16:20','资管·李资管','绑定','投放记录#6 绑定采购合同 KJ000001'],
+  ['2024-04-02 15:41','资管·李资管','删除','删除错误导入行（账户ID AP100099 不存在）'],
+  ['2024-04-02 14:02','系统','抓取','小时快照入库 96 行，热门判定命中 4 首'],
+  ['2024-04-02 10:15','王小辉','导入','执行数据导入 13 行，成功 12 / 失败 1'],
+];
+let ROLE = 'admin';
+let TREND_PERIOD = '最近一小时';
+const TREND_PERIODS = ['最近一小时','最近三小时','最近十二小时','当天','本周','近一周'];
+const METRIC_NAMES = ['点赞量','收藏量','评论量','转发量'];
+
+/* ================= 工具 ================= */
+const $ = id => document.getElementById(id);
+const fmt = n => (n||0).toLocaleString('zh-CN');
+function toast(msg, type){ const t=$('toastEl'); t.textContent=msg; t.className='toast '+(type||''); t.style.display='block'; clearTimeout(t._h); t._h=setTimeout(()=>t.style.display='none',2600); }
+function arrow(v){ if(v===0||v===undefined) return '<span class="muted">—</span>'; return v>0?`<span class="up">↑${fmt(v)}</span>`:`<span class="down">↓${fmt(Math.abs(v))}</span>`; }
+function rankArrow(v){ if(v===0||v===undefined) return '<span class="muted">—</span>'; return v>0?`<span class="up">↑${v}</span>`:`<span class="down">↓${v}</span>`; }
+function statusBadge(s){ const m={'执行中':'status-active','待执行':'status-pending','执行完成':'status-done'}; return `<span class="status ${m[s]||'status-done'}">${s}</span>`; }
+function songAgg(songId){
+  const ds = DELIVERIES.filter(d=>d.song===songId);
+  const m=[0,0,0,0]; ds.forEach(d=>d.m.forEach((v,i)=>m[i]+=v));
+  const stSet = ds.map(d=>d.status);
+  const status = stSet.includes('执行中')?'执行中':(stSet.includes('待执行')?'待执行':'执行完成');
+  return {ds, m, status, accounts:new Set(ds.map(d=>d.account)).size, platforms:new Set(ds.map(d=>d.platform)).size, count:ds.length};
+}
+function filteredDeliveries(){
+  let ds = DELIVERIES.slice();
+  if(ROLE==='rep') ds = ds.filter(d=>execOfDelivery(d)==='王小辉');
+  const q=($('fSong')?.value||'').trim(), p=($('fPerf')?.value||'').trim();
+  if(q) ds = ds.filter(d=>d.song.includes(q)||SONGS[d.song].name.includes(q));
+  if(p) ds = ds.filter(d=>SONGS[d.song].performer.includes(p));
+  const a=$('fAcc')?.value, e=$('fExec')?.value, pl=$('fPlat')?.value, st=$('fStatus')?.value;
+  if(a) ds=ds.filter(d=>d.account===a);
+  if(e) ds=ds.filter(d=>execOfDelivery(d)===e);
+  if(pl) ds=ds.filter(d=>d.platform===pl);
+  if(st) ds=ds.filter(d=>d.status===st);
+  return ds;
+}
+function dateFiltered(){ return ($('fFrom')&&$('fFrom').value)||($('fTo')&&$('fTo').value); }
+function spark(data,color){
+  const w=200,h=44,max=Math.max(...data),min=Math.min(...data);
+  const pts=data.map((v,i)=>`${(i*(w/(data.length-1))).toFixed(1)},${(h-4-((v-min)/((max-min)||1))*(h-10)).toFixed(1)}`).join(' ');
+  return `<svg viewBox="0 0 ${w} ${h}" style="width:100%;height:44px"><polyline points="${pts}" fill="none" stroke="${color}" stroke-width="2"/></svg>`;
+}
+function trendData(seed){ const base=42000; return [0,1,2,3,4,5,6].map(i=>base+((seed*97+i*131)%9000)-3000+ i*350); }
+
+/* ================= 导航 / 角色 ================= */
+const PAGE_META = {
+  task:['推广任务','推广管理 / 防重控制 + 投放计划派生源（V1.1）'],
+  song:['歌曲（推广歌曲）','推广管理 / 歌曲粒度'],
+  hot:['热门歌曲','推广管理 / 热门预警'],
+  admin:['基础数据维护','基础配套 / 资管'],
+};
+let CUR_PAGE = 'task';
+function showPage(p){
+  if(!PAGE_META[p]){ toast('该页面已在 V1.2 精简移除：'+p, 'warn'); return; }
+  CUR_PAGE = p;
+  document.querySelectorAll('.page-view').forEach(v=>v.classList.remove('active'));
+  $('page-'+p).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.toggle('active', n.dataset.page===p));
+  $('pageTitle').textContent = PAGE_META[p][0]; $('pageCrumb').textContent = PAGE_META[p][1];
+  if(p==='song') renderSong();
+  if(p==='task'){ backTaskList(); renderTasks(); }
+  if(p==='hot'){ backHotList(); renderHot(); }
+  if(p==='admin') renderAdmin();
+}
+document.querySelectorAll('.nav-item').forEach(n=>n.addEventListener('click',()=>showPage(n.dataset.page)));
+function switchRole(r){
+  ROLE = r;
+  const map = {admin:['管理员','管'], asset:['李资管','资'], rep:['王小辉','王']};
+  $('userName').textContent = map[r][0]; $('userAva').textContent = map[r][1];
+  $('navAdmin').classList.toggle('hidden', r === 'rep');
+  toast('已切换角色：' + map[r][0] + (r==='rep' ? '（推广业务员视角，基础数据维护已隐藏）' : ''), 'ok');
+  if(r === 'rep' && CUR_PAGE === 'admin') showPage('task'); else showPage(CUR_PAGE);
+}
+
+/* ================= 歌曲（推广歌曲） ================= */
+function renderSong(){
+  const songId = $('sSongSel').value || 'A002001';
+  let ds = DELIVERIES.filter(d=>d.song===songId);
+  const e=$('sExec').value, a=$('sAcc').value;
+  if(e) ds=ds.filter(d=>execOfDelivery(d)===e);
+  if(a) ds=ds.filter(d=>d.account===a);
+  const tot=[0,0,0,0]; ds.forEach(d=>d.m.forEach((v,i)=>tot[i]+=v));
+  $('songCards').innerHTML = METRIC_NAMES.map((n,i)=>`<div class="stat-card ${['blue','green','purple','cyan'][i]}"><div class="lb">${n}总量</div><div class="vl">${fmt(tot[i])}</div></div>`).join('');
+  const seed=+songId.slice(-2);
+  $('songCharts').innerHTML = METRIC_NAMES.map((n,i)=>`<div class="chart-box"><div class="ct"><span>${n}趋势图（按天）</span><span class="muted">日快照</span></div>${spark(trendData(seed+i),['#2563eb','#059669','#7c3aed','#0891b2'][i])}</div>`).join('');
+  ds.sort((x,y)=>y.m[0]-x.m[0]);
+  $('songTable').innerHTML = `<tr><th>序号</th><th>歌曲名称</th><th>表演者</th><th>点赞量</th><th>收藏量</th><th>评论量</th><th>转发量</th><th>执行账号</th><th>推广状态</th><th>推广执行人</th><th>推广平台</th><th>推广起始</th><th>推广截止</th><th>歌曲推广链接</th><th>投放记录链接</th><th>推广合同号</th><th>采购合同号</th></tr>` +
+    ds.map((d,i)=>`<tr>
+      <td>${i+1}</td><td>${SONGS[d.song].name}</td><td>${SONGS[d.song].performer}</td>
+      ${d.m.map(v=>`<td>${fmt(v)}</td>`).join('')}
+      <td><span class="link" onclick="openAccount('${d.account}')">${d.account}</span></td>
+      <td>${statusBadge(d.status)} ${d.expired?'<span class="status status-expired">已过期·待绑合同</span>':''} ${d.videoStatus==='已下架'?'<span class="status status-off">视频已下架</span>':''}</td>
+      <td>${execOfDelivery(d)}</td><td><span class="tag tag-blue">${d.platform}</span></td>
+      <td>${d.period.split('~')[0]}</td><td>${d.period.split('~')[1]}</td>
+      <td><span class="link" onclick="toast('打开推广链接存证（${d.videos} 条视频）')">详情(${d.videos})</span></td>
+      <td><span class="link" onclick="toast('打开投放记录链接存证：证明推广真实存在过')">详情</span></td>
+      <td>${d.tg?`<span class="link" onclick="toast('跳转推广合同详情 ${d.tg}')">${d.tg}</span>`:'—'}</td>
+      <td>${d.kj?`<span class="link" onclick="toast('跳转采购合同详情 ${d.kj}')">${d.kj}</span>`:'—'}</td></tr>`).join('');
+}
+
+/* ================= 推广任务（V1.1：投放明细 + 视频自动追踪） ================= */
+const PLAT_HOST = {'抖音':['douyin.com','iesdouyin.com'],'快手':['kuaishou.com','gifshow.com'],'酷狗':['kugou.com']};
+const tkCls = {'追踪中':'tk-run','已停止':'tk-done','抓取异常':'tk-err','待启动':'tk-wait','未启动':'tk-idle','已完成':'tk-done','部分异常':'tk-err'};
+const tkBadge = s => `<span class="tk ${tkCls[s]||'tk-idle'}">${s}</span>`;
+const money = n => '¥' + (n||0).toLocaleString();
+const taskActual = t => (t.details||[]).reduce((s,d)=>s+(parseFloat(d.amount)||0),0);
+const parsePillCls = {'解析成功':'pill-ok','账号未登记':'pill-warn','解析失败':'pill-err','平台不匹配':'pill-err','待解析':'pill-gray'};
+
+/* ---- 视频链接解析（mock：平台白名单 → video_id → 反查账号 → 带出业务员） ---- */
+function parseVideoLink(url, platform){
+  const u = (url||'').trim();
+  if(!u) return {status:'待解析', ok:false, msg:''};
+  const host = u.replace(/^https?:\/\//,'').split('/')[0];
+  const allowed = PLAT_HOST[platform] || [];
+  if(!allowed.some(h=>host.indexOf(h)>=0))
+    return {status:'平台不匹配', ok:false, msg:`域名 ${host} 与任务推广平台「${platform}」不一致`};
+  const m = u.match(/(?:video|shortvideo|f)\/(\d+)/) || u.match(/(\d{15,25})/);
+  if(!m) return {status:'解析失败', ok:false, msg:'无法解析 video_id，请确认是视频详情页地址'};
+  const vid = m[1];
+  if(vid.indexOf('7399')===0)
+    return {status:'账号未登记', ok:false, vid, msg:'反查到发布账号 AP100099 未在资管维护登记，请先登记'};
+  let h=0; for(let i=0;i<vid.length;i++) h=(h*31+vid.charCodeAt(i))>>>0;
+  const acc = ACCOUNTS[h % ACCOUNTS.length];
+  if(acc.platform !== platform)
+    return {status:'平台不匹配', ok:false, vid, msg:`反查账号 ${acc.id} 所属平台为「${acc.platform}」，与任务平台不一致`};
+  return {status:'解析成功', ok:true, vid, account:acc.id, accountName:acc.name, executor:acc.owner,
+          msg:`已反查账号 ${acc.name}（${acc.id}）· 业务员 ${acc.owner}`};
+}
+
+/* ---- 列表 ---- */
+function renderTaskStats(){
+  const budget = TASKS.reduce((s,t)=>s+(t.budget||0),0);
+  const actual = TASKS.reduce((s,t)=>s+taskActual(t),0);
+  const vids   = TASKS.reduce((s,t)=>s+((t.details||[]).length),0);
+  const running= TASKS.reduce((s,t)=>s+((t.details||[]).filter(d=>d.track==='追踪中').length),0);
+  const errs   = TASKS.reduce((s,t)=>s+((t.details||[]).filter(d=>d.track==='抓取异常').length),0);
+  const rate   = budget? (actual/budget*100) : 0;
+  $('taskStats').innerHTML = `
+    <div class="stat-card blue"><div class="lb">推广预算总额</div><div class="vl">${money(budget)}</div><div class="dl">${TASKS.length} 个任务</div></div>
+    <div class="stat-card purple"><div class="lb">实际投放总额</div><div class="vl">${money(actual)}</div><div class="dl">按投放明细汇总</div></div>
+    <div class="stat-card ${rate>80?'orange':'green'}"><div class="lb">预算使用率</div><div class="vl">${rate.toFixed(1)}%</div><div class="dl">剩余 ${money(budget-actual)}</div></div>
+    <div class="stat-card cyan"><div class="lb">投放明细（视频）数</div><div class="vl">${vids}</div><div class="dl">粒度：歌曲×平台×账号×期间×视频</div></div>
+    <div class="stat-card"><div class="lb">追踪中视频</div><div class="vl">${running}</div><div class="dl">小时快照 + 日快照</div></div>
+    <div class="stat-card red"><div class="lb">抓取异常</div><div class="vl">${errs}</div><div class="dl">连续失败 ≥3 次</div></div>`;
+}
+function renderTasks(){
+  renderTaskStats();
+  $('taskTable').innerHTML = `<tr><th>任务ID</th><th>任务名称</th><th>平台</th><th>推广周期</th><th>关联推广合同</th>
+    <th>推广预算</th><th>实际金额 / 预算</th><th>投放明细</th><th>追踪状态</th><th>任务状态</th><th>创建人</th><th>操作</th></tr>` +
+    TASKS.map(t=>{
+      const act = taskActual(t), rate = t.budget? act/t.budget*100 : 0;
+      const cls = rate>=100?'over':(rate>=80?'warn':'');
+      const errN = (t.details||[]).filter(d=>d.track==='抓取异常').length;
+      return `<tr><td>${t.id}</td><td><span class="link" onclick="openTaskDetail('${t.id}')">${t.name}</span></td>
+      <td><span class="tag tag-blue">${t.platform}</span></td><td>${t.start} ~ ${t.end}</td>
+      <td>${t.tg?`<span class="link">${t.tg}</span>`:'—'}</td>
+      <td>${money(t.budget)} ${t.amountSource==='contract'?`<span class="lock" title="来源：推广合同 ${t.tg}，只读">🔒合同</span>`:''}</td>
+      <td><div>${money(act)} <span class="muted">/ ${money(t.budget)}</span></div>
+          <div class="bar"><i class="${cls}" style="width:${Math.min(rate,100)}%"></i></div></td>
+      <td><span class="link" onclick="openTaskDetail('${t.id}')">${(t.details||[]).length}</span> 条</td>
+      <td>${tkBadge(t.trackStatus)}${errN?` <span class="tag tag-red">${errN}</span>`:''}</td>
+      <td><span class="status status-active">进行中</span></td><td>${t.creator}</td>
+      <td><span class="link" onclick="openTaskDetail('${t.id}')">详情</span>
+          <span class="link" onclick="toast('编辑任务：绑定合同后周期与预算只读')">编辑</span>
+          <span class="link" onclick="toast('仅无投放记录的任务可删除','warn')">删除</span></td></tr>`;
+    }).join('');
+}
+
+/* ---- 详情 ---- */
+let CUR_TASK = null;
+function openTaskDetail(id){
+  CUR_TASK = TASKS.find(x=>x.id===id);
+  const t = CUR_TASK;
+  $('taskListView').style.display='none'; $('taskWizardView').style.display='none'; $('taskDetailView').style.display='block';
+  $('taskDetailTitle').textContent = `${t.name}（${t.id}） · ${t.platform} · ${t.start} ~ ${t.end}`;
+  const act = taskActual(t), left = (t.budget||0)-act, rate = t.budget? act/t.budget*100:0;
+  const cls = rate>=100?'over':(rate>=80?'warn':'');
+  const run=(t.details||[]).filter(d=>d.track==='追踪中').length, err=(t.details||[]).filter(d=>d.track==='抓取异常').length, stop=(t.details||[]).filter(d=>d.track==='已停止').length;
+  const contractUsed = t.tg ? TASKS.filter(x=>x.tg===t.tg).reduce((s,x)=>s+taskActual(x),0) : 0;
+  $('taskOverview').innerHTML = `<h3>任务概览 ${t.amountSource==='contract'?`<span class="lock">🔒 周期与预算来源：推广合同 ${t.tg}（只读）</span>`:''}</h3>
+    <div class="kvgrid">
+      <div><div class="k">推广预算</div><div class="v">${money(t.budget)}</div></div>
+      <div><div class="k">实际金额合计</div><div class="v" style="color:#7c3aed">${money(act)}</div></div>
+      <div><div class="k">预算剩余</div><div class="v" style="color:${left<0?'#dc2626':'#059669'}">${money(left)}</div></div>
+      <div><div class="k">预算使用率</div><div class="v">${rate.toFixed(1)}%<div class="bar" style="margin-top:4px"><i class="${cls}" style="width:${Math.min(rate,100)}%"></i></div></div></div>
+      <div><div class="k">投放明细（视频）数</div><div class="v">${(t.details||[]).length} 条</div></div>
+      <div><div class="k">追踪中 / 异常 / 已停止</div><div class="v">${run} / <span style="color:#dc2626">${err}</span> / ${stop}</div></div>
+      <div><div class="k">合同已分配额度</div><div class="v">${t.tg?money(contractUsed)+' / '+money(t.contractAmount):'—（未绑定合同）'}</div></div>
+      <div><div class="k">最近抓取时间</div><div class="v">${(t.details||[]).map(d=>d.crawl).sort().pop()||'—'}</div></div>
+    </div>
+    ${t.tg && TASKS.filter(x=>x.tg===t.tg).length>1 ? `<div class="info-box orange" style="margin:12px 0 0">⚠️ 推广合同 <b>${t.tg}</b> 已绑定 <b>${TASKS.filter(x=>x.tg===t.tg).length}</b> 个任务，预算为合同全额共享。合同已分配 <b>${money(contractUsed)}</b> / 合同金额 <b>${money(t.contractAmount)}</b>，超发将被阻断（护栏 V9）。</div>`:''}`;
+  taskTab(0, document.querySelector('#taskDetailView .dtab'));
+  renderTaskTracking(t); renderTaskSongs(t); renderTaskErrors(t);
+}
+function taskTab(i, el){
+  document.querySelectorAll('#taskDetailView .dtab').forEach(x=>x.classList.remove('active'));
+  if(el) el.classList.add('active');
+  for(let k=0;k<3;k++) $('tdp'+k).classList.toggle('active', k===i);
+}
+function renderTaskTracking(t){
+  const ds = t.details||[];
+  $('tdp0').innerHTML = `<div class="card"><h3>投放明细与追踪数据 <span class="sub">粒度：歌曲 × 平台 × 执行账号 × 推广期间 × <b>视频</b>（V1.1 修订）</span></h3>
+   <div class="scroll-x"><table class="tbl"><tr><th>#</th><th>视频链接（video_id）</th><th>歌曲</th><th>执行账号</th><th>业务员</th><th>实际金额</th>
+   <th>点赞</th><th>播放</th><th>评论</th><th>转发</th><th>小时点赞增量</th><th>环比</th><th>热门</th><th>追踪状态</th><th>最近抓取</th><th>操作</th></tr>` +
+   (ds.map((d,i)=>`<tr>
+     <td>${i+1}</td>
+     <td><span class="vlink" onclick="toast('外跳平台视频页：${d.url}','ok')">${d.url}</span><div class="muted" style="font-size:10px">video_id: ${d.vid}</div></td>
+     <td><span class="link">${SONGS[d.song]?SONGS[d.song].name:d.song}</span><div class="muted" style="font-size:10px">${d.song}</div></td>
+     <td>${d.accountName}<div class="muted" style="font-size:10px">${d.account} · 反查只读</div></td>
+     <td>${d.executor}</td>
+     <td><b>${money(d.amount)}</b><div class="muted" style="font-size:10px">均赞成本 ${d.m[0]? (d.amount/d.m[0]).toFixed(3):'—'} 元</div></td>
+     <td>${fmt(d.m[0])}</td><td>${fmt(d.plays)}</td><td>${fmt(d.m[2])}</td><td>${fmt(d.m[3])}</td>
+     <td>${fmt(d.inc)}</td>
+     <td>${d.ratio>0?`<span style="color:#059669">▲${d.ratio}%</span>`:(d.ratio<0?`<span style="color:#dc2626">▼${Math.abs(d.ratio)}%</span>`:'<span class="muted">—</span>')}</td>
+     <td>${d.hot?'<span class="hotflag">🔥 上榜</span>':'<span class="muted">—</span>'}</td>
+     <td>${tkBadge(d.track)}</td><td class="muted" style="font-size:11px">${d.crawl}</td>
+     <td><span class="link" onclick="toast('打开单视频趋势抽屉：小时级/日级切换，标注热门上榜时刻')">趋势</span>
+         ${d.track==='抓取异常'?` <span class="link" onclick="toast('已触发手工重试抓取','ok')">重试</span>`:''}
+         ${d.track==='追踪中'?` <span class="link" onclick="toast('标记链接失效：将停止追踪，历史快照保留（数据留痕）','warn')">标记失效</span>`:''}</td>
+   </tr>`).join('') || '<tr><td colspan="16" class="muted">暂无投放明细</td></tr>') +
+   `</table></div>
+   <div class="info-box blue" style="margin:12px 0 0">追踪引擎：投放记录派生成功且链接解析通过即<b>自动启动</b>，按 <code>video_id</code> 抓取点赞/收藏/评论/转发/播放；存<b>平台累计值</b>，增量＝相邻快照差值（决策五）。停止条件：过推广截止日 / 歌曲下架 / 视频下架 / 任务终止；停止后历史快照<b>保留可查</b>。</div></div>`;
+}
+function renderTaskSongs(t){
+  $('tdp1').innerHTML = `<div class="card"><h3>任务歌曲清单 <span class="sub">导入失败行生成失败报表可下载</span></h3>
+    <div class="scroll-x"><table class="tbl"><tr><th>歌曲ID</th><th>歌曲名称</th><th>表演者</th><th>导入状态</th><th>失败原因</th><th>关联投放明细</th><th>操作</th></tr>` +
+    t.songs.map(s=>{
+      const n = (t.details||[]).filter(d=>d.song===s[0]).length;
+      return `<tr><td>${s[0]}</td><td>${SONGS[s[0]]?SONGS[s[0]].name:'—'}</td><td>${SONGS[s[0]]?SONGS[s[0]].performer:'—'}</td>
+      <td>${s[1]==='成功'?'<span class="status status-active">成功</span>':'<span class="status status-off">失败</span>'}</td><td>${s[2]||'—'}</td>
+      <td>${n?n+' 条视频':'—'}</td>
+      <td>${s[1]==='成功'?`<span class="link" onclick="toast('跳转歌曲详情页（需资管完成歌曲绑定）')">歌曲详情</span>`:'—'}</td></tr>`;
+    }).join('') + `</table></div>
+    <div class="flex mt8"><button class="btn primary sm" onclick="toast('追加投放明细：需填视频链接，解析通过后派生新投放记录')">＋ 追加投放明细</button>
+    <button class="btn sm" onclick="toast('失败报表已下载：fail_report.xlsx','ok')">下载失败报表</button></div></div>`;
+}
+function renderTaskErrors(t){
+  const errs = (t.details||[]).filter(d=>d.track==='抓取异常');
+  $('tdp2').innerHTML = `<div class="card"><h3>抓取异常 <span class="sub">连续失败 ≥3 次自动转异常并通知责任业务员</span></h3>` +
+   (errs.length ? `<div class="scroll-x"><table class="tbl"><tr><th>视频链接</th><th>歌曲</th><th>执行账号</th><th>责任业务员</th><th>连续失败</th><th>最后错误</th><th>最近抓取</th><th>操作</th></tr>` +
+    errs.map(d=>`<tr><td><span class="vlink">${d.url}</span></td><td>${SONGS[d.song]?SONGS[d.song].name:d.song}</td>
+      <td>${d.accountName}（${d.account}）</td><td>${d.executor}</td><td><span class="tag tag-red">${d.fail} 次</span></td>
+      <td style="color:#dc2626">${d.errMsg||'未知错误'}</td><td class="muted">${d.crawl}</td>
+      <td><span class="link" onclick="toast('已触发手工重试抓取','ok')">重试抓取</span>
+          <span class="link" onclick="toast('已标记链接失效：停止追踪，历史快照保留','warn')">标记失效</span></td></tr>`).join('') + `</table></div>
+    <div class="flex mt8"><button class="btn primary sm" onclick="toast('已批量重试 ${errs.length} 条异常抓取','ok')">批量重试</button></div>`
+    : '<div class="info-box green" style="margin-bottom:0">✔ 当前任务无抓取异常。</div>') + '</div>';
+}
+function backTaskList(){ $('taskListView').style.display='block'; $('taskWizardView').style.display='none'; $('taskDetailView').style.display='none'; renderTasks(); }
+
+/* ---- 创建向导 ---- */
+let WIZ = {step:1, songs:[], details:[], importRes:null};
+function openTaskWizard(){
+  backTaskList(); $('taskListView').style.display='none'; $('taskWizardView').style.display='block';
+  WIZ={step:1, songs:[], details:[], importRes:null};
+  $('wName').value=''; $('wTg').value=''; $('wBudget').value='80000'; $('wBudget').disabled=false;
+  $('wStart').disabled=false; $('wEnd').disabled=false; $('wStart').value='2024-05-01'; $('wEnd').value='2024-05-31';
+  $('wTgNote').style.display='none'; $('wTgMulti').style.display='none'; $('wizImportResult').innerHTML='';
+  addDetailLine(); wizGoto(1);
+}
+function closeTaskWizard(){ backTaskList(); }
+function wizGoto(n){
+  WIZ.step=n;
+  [1,2,3].forEach(i=>{ $('ws'+i).className='wiz-step '+(i<n?'done':(i===n?'active':'')); $('wp'+i).classList.toggle('active', i===n); });
+  if(n===2){ renderDetailLines(); }
+  if(n===3){ renderWizCheck(); }
+}
+function wizNext(n){
+  if(n===2 && WIZ.step===1){
+    const name=$('wName').value.trim();
+    if(!name){ toast('任务名称必填','err'); return; }
+    if(TASKS.some(t=>t.name===name)){ toast('校验失败：任务名称不可重复（规则a）','err'); return; }
+    if(!($('wStart').value<$('wEnd').value)){ toast('校验失败：推广开始时间需早于结束时间','err'); return; }
+    if(!(parseFloat($('wBudget').value)>0)){ toast('校验失败：推广预算必填且需大于 0','err'); return; }
+  }
+  if(n===3 && WIZ.step===2){
+    if(WIZ.details.length===0){ toast('请至少录入一条投放明细（视频链接必填）','err'); return; }
+    const bad = WIZ.details.filter(d=>d.parse!=='解析成功');
+    if(bad.length){ toast(`校验失败：${bad.length} 条明细未解析成功，无法启动追踪（规则 V12）`,'err'); return; }
+    const budget=parseFloat($('wBudget').value)||0, sum=WIZ.details.reduce((s,d)=>s+(parseFloat(d.amount)||0),0);
+    if(sum>budget){ toast(`校验失败：实际金额合计 ${money(sum)} 超出推广预算 ${money(budget)}（规则 V8）`,'err'); return; }
+    if(WIZ.details.some(d=>!(parseFloat(d.amount)>0))){ toast('校验失败：每条明细的实际金额必填且需大于 0','err'); return; }
+  }
+  wizGoto(n);
+}
+function onWizPlatChange(){
+  WIZ.details.forEach(d=>{ if(d.url){ const r=parseVideoLink(d.url,$('wPlat').value); Object.assign(d,{parse:r.status,msg:r.msg,vid:r.vid||'',account:r.ok?r.account:'',accountName:r.ok?r.accountName:'',executor:r.ok?r.executor:''}); } });
+  renderDetailLines();
+}
+function onWizTg(v){
+  const lock=!!v;
+  $('wStart').disabled=lock; $('wEnd').disabled=lock; $('wBudget').disabled=lock;
+  $('wTgNote').style.display=lock?'block':'none';
+  $('wTgMulti').style.display=(v==='TG00009')?'block':'none';
+  const hint=$('wBudgetHint');
+  if(v==='TG00009'){ $('wStart').value='2024-04-01'; $('wEnd').value='2024-04-30'; $('wBudget').value=120000;
+    hint.innerHTML='<span class="lock">🔒 已同步推广合同 TG00009 金额 ¥120,000，只读。本合同已绑定 2 个任务，累计占用受超发护栏约束。</span>'; }
+  else if(v==='TG00010'){ $('wStart').value='2024-05-01'; $('wEnd').value='2024-05-31'; $('wBudget').value=50000;
+    hint.innerHTML='<span class="lock">🔒 已同步推广合同 TG00010 金额 ¥50,000，只读。</span>'; }
+  else { hint.innerHTML='任务层预算做<b>总额控制</b>；投放明细层填<b>单条实际金额</b>做结算与单视频 ROI（金额双层模型）。'; }
+  renderDetailSummary();
+}
+function addDetailLine(pre){
+  WIZ.details.push(pre || {song:'', url:'', vid:'', account:'', accountName:'', executor:'', amount:'', parse:'待解析', msg:''});
+  renderDetailLines();
+}
+function delDetail(i){ WIZ.details.splice(i,1); if(!WIZ.details.length) addDetailLine(); renderDetailLines(); }
+function updDetail(i, field, val){
+  const d = WIZ.details[i]; d[field]=val;
+  if(field==='url'){
+    const r = parseVideoLink(val, $('wPlat').value);
+    d.parse=r.status; d.msg=r.msg; d.vid=r.vid||'';
+    d.account=r.ok?r.account:''; d.accountName=r.ok?r.accountName:''; d.executor=r.ok?r.executor:'';
+    if(r.ok) toast(`链接解析成功：反查账号 ${r.accountName}（${r.account}）· 业务员 ${r.executor}`,'ok');
+    else if(val.trim()) toast(`解析失败：${r.status} — ${r.msg}`,'err');
+  }
+  renderDetailLines();
+}
+function renderDetailLines(){
+  const songOpts = id => Object.entries(SONGS).filter(([k,s])=>!s.draft)
+    .map(([k,s])=>`<option value="${k}" ${id===k?'selected':''}>${s.name} · ${s.performer}</option>`).join('');
+  const head = `<div class="dhead"><div>歌曲 *</div><div>平台视频链接 *（失焦自动解析）</div><div>执行账号（自动反查·只读）</div>
+    <div>业务员</div><div>实际金额 *</div><div>解析状态</div><div></div></div>`;
+  const seen = {};
+  const rows = WIZ.details.map((d,i)=>{
+    let extra='';
+    if(d.vid){ if(seen[d.vid]) { extra='<div class="pmsg" style="color:#dc2626">✘ 该 video_id 在本任务内重复（规则 V6）</div>'; } seen[d.vid]=1; }
+    const pill = `<span class="pill ${parsePillCls[d.parse]||'pill-gray'}">${d.parse}</span>`;
+    const msg  = d.msg ? `<div class="pmsg" style="color:${d.parse==='解析成功'?'#059669':'#dc2626'}">${d.parse==='解析成功'?'✔ ':'✘ '}${d.msg}</div>` : '';
+    return `<div class="dline">
+      <select onchange="updDetail(${i},'song',this.value)"><option value="">请选择歌曲</option>${songOpts(d.song)}</select>
+      <div><input value="${d.url||''}" placeholder="https://www.douyin.com/video/73xxxxxxxxxxxxxxx" onchange="updDetail(${i},'url',this.value)">${d.vid?`<div class="pmsg muted">video_id: ${d.vid}</div>`:''}</div>
+      <input value="${d.account?d.accountName+'（'+d.account+'）':''}" readonly placeholder="解析后自动回填">
+      <input value="${d.executor||''}" readonly placeholder="自动带出">
+      <input type="number" value="${d.amount||''}" placeholder="0" onchange="updDetail(${i},'amount',this.value)">
+      <div>${pill}${msg}${extra}</div>
+      <div class="link" style="color:#dc2626;text-align:center;padding-top:6px" onclick="delDetail(${i})">✕</div>
+    </div>`;
+  }).join('');
+  $('wizDetailLines').innerHTML = head + (rows||'<div class="muted">暂无明细行</div>');
+  renderDetailSummary();
+}
+function renderDetailSummary(){
+  const budget = parseFloat($('wBudget').value)||0;
+  const sum = WIZ.details.reduce((s,d)=>s+(parseFloat(d.amount)||0),0);
+  const left = budget - sum;
+  const bad = WIZ.details.filter(d=>d.parse!=='解析成功');
+  const vids = WIZ.details.map(d=>d.vid).filter(Boolean);
+  const dup = vids.length - new Set(vids).size;
+  const tg = $('wTg').value;
+  let contractLeft = null;
+  if(tg==='TG00009') contractLeft = 120000 - TASKS.filter(t=>t.tg===tg).reduce((s,t)=>s+taskActual(t),0) - sum;
+  if(tg==='TG00010') contractLeft = 50000  - TASKS.filter(t=>t.tg===tg).reduce((s,t)=>s+taskActual(t),0) - sum;
+  $('wizDetailSum').innerHTML = `
+    <span>已录明细 <b>${WIZ.details.length}</b> 条</span>
+    <span>实际金额合计 <b style="color:#7c3aed">${money(sum)}</b></span>
+    <span>推广预算 <b>${money(budget)}</b></span>
+    <span>预算剩余 <b style="color:${left<0?'#dc2626':'#059669'}">${money(left)}</b></span>
+    ${left<0?`<span class="pill pill-err">✘ 超预算 ${money(-left)}，将阻断保存（V8）</span>`:`<span class="pill pill-ok">✔ 预算校验通过</span>`}
+    ${bad.length?`<span class="pill pill-err">✘ ${bad.length} 条未解析成功（V12）</span>`:`<span class="pill pill-ok">✔ 全部解析成功</span>`}
+    ${dup>0?`<span class="pill pill-err">✘ ${dup} 条 video_id 重复（V6）</span>`:''}
+    ${contractLeft!==null?`<span>合同剩余额度 <b style="color:${contractLeft<0?'#dc2626':'#059669'}">${money(contractLeft)}</b></span>${contractLeft<0?'<span class="pill pill-err">✘ 超合同额，阻断（V9）</span>':'<span class="pill pill-ok">✔ 合同护栏通过</span>'}`:''}`;
+}
+function fillDemoLines(){
+  WIZ.details = [
+    {song:'A002001', url:'https://www.douyin.com/video/7358234567890111000', amount:18000},
+    {song:'A002005', url:'https://www.douyin.com/video/7358234567890222000', amount:15000},
+    {song:'A002013', url:'https://www.douyin.com/video/7358234567890333000', amount:12000}
+  ].map(d=>{ const r=parseVideoLink(d.url,$('wPlat').value);
+    return Object.assign(d,{vid:r.vid||'',account:r.ok?r.account:'',accountName:r.ok?r.accountName:'',executor:r.ok?r.executor:'',parse:r.status,msg:r.msg}); });
+  renderDetailLines(); toast('已填充 3 行示例明细，链接解析与账号反查已自动执行','ok');
+}
+function fillBadLine(){
+  WIZ.details.push({song:'A002009', url:'https://www.douyin.com/video/7399000000000000001', amount:9000, vid:'', account:'', accountName:'', executor:'', parse:'待解析', msg:''});
+  WIZ.details.push({song:'A002009', url:'https://v.kuaishou.com/abc123', amount:6000, vid:'', account:'', accountName:'', executor:'', parse:'待解析', msg:''});
+  renderDetailLines();
+  const ds=WIZ.details;
+  [ds.length-2, ds.length-1].forEach(i=>{ const r=parseVideoLink(ds[i].url,$('wPlat').value);
+    Object.assign(ds[i],{parse:r.status,msg:r.msg,vid:r.vid||'',account:r.ok?r.account:'',accountName:r.ok?r.accountName:'',executor:r.ok?r.executor:''}); });
+  renderDetailLines();
+  toast('已填充 2 行异常示例：账号未登记 / 平台不匹配','warn');
+}
+function simTemplateImport(){
+  WIZ.importRes = {ok:['A002009','A002013','A002005'], fail:[['A002999','歌曲不存在（先创建歌曲再进行导入）']]};
+  ['https://www.douyin.com/video/7359234567890444000|A002009|11000',
+   'https://www.douyin.com/video/7359234567890555000|A002013|13000',
+   'https://www.douyin.com/video/7359234567890666000|A002005|10000'].forEach(row=>{
+    const [url,song,amt]=row.split('|'); const r=parseVideoLink(url,$('wPlat').value);
+    WIZ.details.push({song, url, amount:amt, vid:r.vid||'', account:r.ok?r.account:'', accountName:r.ok?r.accountName:'', executor:r.ok?r.executor:'', parse:r.status, msg:r.msg});
+  });
+  renderDetailLines();
+  $('wizImportResult').innerHTML = `<div class="info-box green" style="margin-bottom:6px">模板导入完成：成功 3 行（含视频链接与推广金额，已自动解析并反查账号）</div>
+    <div class="info-box red" style="margin-bottom:0">失败 1 行：<b>A002999</b> — 歌曲不存在 <span class="link" onclick="toast('失败报表已下载','ok')">下载失败报表</span></div>`;
+  toast('模板导入完成：成功3 / 失败1（模板已含视频链接、推广金额两列）','warn');
+}
+function wizContractOk(){
+  const tg=$('wTg').value; if(!tg) return true;
+  const cap = tg==='TG00009'?120000:50000;
+  const used = TASKS.filter(t=>t.tg===tg).reduce((s,t)=>s+taskActual(t),0);
+  const sum = WIZ.details.reduce((s,d)=>s+(parseFloat(d.amount)||0),0);
+  return used+sum <= cap;
+}
+function renderWizCheck(){
+  const name=$('wName').value.trim()||'（未填写）';
+  const budget=parseFloat($('wBudget').value)||0;
+  const sum=WIZ.details.reduce((s,d)=>s+(parseFloat(d.amount)||0),0);
+  const bad=WIZ.details.filter(d=>d.parse!=='解析成功');
+  const noAmt=WIZ.details.filter(d=>!(parseFloat(d.amount)>0));
+  const vids=WIZ.details.map(d=>d.vid).filter(Boolean);
+  const dup=vids.length-new Set(vids).size;
+  const dupPlat=WIZ.details.filter(d=>d.song && DELIVERIES.some(x=>x.song===d.song && x.platform===$('wPlat').value && !x.taskId));
+  const checks=[
+    [name!=='（未填写）' && !TASKS.some(t=>t.name===name), 'V1 任务名称必填且全局唯一'],
+    [$('wStart').value < $('wEnd').value, '推广周期合法性（开始 < 结束）'],
+    [budget>0, '推广预算必填且 > 0' + ($('wTg').value?'（已同步合同金额，只读）':'')],
+    [WIZ.details.length>0, '至少录入一条投放明细'],
+    [WIZ.details.every(d=>d.url && d.url.trim()), 'V2 视频链接必填（每行）'],
+    [bad.length===0, `V3/V4/V5 链接解析与账号反查${bad.length?`：${bad.length} 条失败（`+bad.map(d=>d.parse).join('、')+`）`:'（全部成功）'}`],
+    [dup===0, `V6 同任务内 video_id 不重复${dup?`：${dup} 条重复`:''}`],
+    [noAmt.length===0, '实际金额必填且 > 0（每行）'],
+    [sum<=budget, `V8 Σ实际金额 ≤ 推广预算：${money(sum)} / ${money(budget)}${sum>budget?`（超 ${money(sum-budget)}）`:''}`],
+    [wizContractOk(), 'V9 合同已分配 + 本次 ≤ 合同金额（超发护栏）'],
+    [dupPlat.length===0, `V7 同歌同平台同期间防重${dupPlat.length?`：${dupPlat.map(d=>SONGS[d.song]?SONGS[d.song].name:d.song).join('、')} 已有导入路径投放记录`:''}`]
+  ];
+  $('wizCheck').innerHTML = checks.map(c=>`<div class="info-box ${c[0]?'green':'red'}" style="margin-bottom:6px">${c[0]?'✔':'✘'} ${c[1]}</div>`).join('');
+  const tg=$('wTg').value;
+  $('wizSummary').innerHTML = `<div class="kvgrid">
+    <div><div class="k">任务名称</div><div class="v">${name}</div></div>
+    <div><div class="k">推广平台</div><div class="v">${$('wPlat').value}</div></div>
+    <div><div class="k">推广周期</div><div class="v">${$('wStart').value} ~ ${$('wEnd').value}${tg?`（同步 ${tg}）`:''}</div></div>
+    <div><div class="k">关联推广合同</div><div class="v">${tg||'—'}</div></div>
+    <div><div class="k">推广预算</div><div class="v">${money(budget)} ${tg?'<span class="lock">🔒合同同步</span>':''}</div></div>
+    <div><div class="k">实际金额合计</div><div class="v" style="color:#7c3aed">${money(sum)}</div></div>
+    <div><div class="k">预算剩余</div><div class="v" style="color:${budget-sum<0?'#dc2626':'#059669'}">${money(budget-sum)}</div></div>
+    <div><div class="k">投放明细</div><div class="v">${WIZ.details.length} 条视频 / ${new Set(WIZ.details.map(d=>d.song).filter(Boolean)).size} 首歌 / ${new Set(WIZ.details.map(d=>d.account).filter(Boolean)).size} 个账号</div></div>
+  </div>
+  <div class="scroll-x mt8"><table class="tbl"><tr><th>歌曲</th><th>视频链接</th><th>执行账号</th><th>业务员</th><th>金额</th><th>解析</th></tr>${
+    WIZ.details.map(d=>`<tr><td>${d.song&&SONGS[d.song]?SONGS[d.song].name:'—'}</td><td class="muted" style="font-size:11px">${d.url||'—'}</td>
+      <td>${d.account?d.accountName+'（'+d.account+'）':'—'}</td><td>${d.executor||'—'}</td><td>${money(parseFloat(d.amount)||0)}</td>
+      <td><span class="pill ${parsePillCls[d.parse]||'pill-gray'}">${d.parse}</span></td></tr>`).join('')||'<tr><td colspan="6" class="muted">无明细</td></tr>'}</table></div>`;
+}
+function buildTask(extra){
+  const tg=$('wTg').value;
+  return Object.assign({
+    id:'T'+Date.now()%100000000, name:$('wName').value.trim(), platform:$('wPlat').value,
+    start:$('wStart').value, end:$('wEnd').value, tg:tg, creator: ROLE==='rep'?'王小辉':'张丽君',
+    budget: parseFloat($('wBudget').value)||0,
+    amountSource: tg?'contract':'manual', contractAmount: tg?(tg==='TG00009'?120000:50000):null,
+    trackStatus:'未启动',
+    songs: [...new Set(WIZ.details.map(d=>d.song).filter(Boolean))].map(id=>[id,'成功','']),
+    details: WIZ.details.map(d=>Object.assign({},d,{
+      amount:parseFloat(d.amount)||0, m:[0,0,0,0], plays:0, inc:0, ratio:0, hot:false,
+      track: d.parse==='解析成功' ? ($('wStart').value<='2024-04-02'?'追踪中':'待启动') : '未启动',
+      crawl:'—', fail:0 }))
+  }, extra||{});
+}
+function deriveDeliveries(t){
+  let n=0, maxId=DELIVERIES.reduce((m,d)=>Math.max(m,d.id),0);
+  t.details.forEach(d=>{
+    if(d.parse!=='解析成功') return;
+    DELIVERIES.push({id:++maxId, song:d.song, platform:t.platform, account:d.account,
+      period:`${t.start}~${t.end}`, status: t.start<='2024-04-02'?'执行中':'待执行',
+      tg:t.tg, kj:'', m:d.m, videos:1, videoStatus:'在架',
+      taskId:t.id, sourceType:'任务派生', amount:d.amount, videoId:d.vid, track:d.track});
+    n++;
+  });
+  return n;
+}
+function saveTaskDraft(){
+  const name=$('wName').value.trim();
+  if(!name || TASKS.some(t=>t.name===name)){ toast('草稿保存失败：任务名称必填且不可重复','err'); return; }
+  const t=buildTask({trackStatus:'未启动'});
+  TASKS.unshift(t); toast('已存为草稿：明细未校验通过也可暂存，不派生投放记录、不启动追踪','warn');
+  backTaskList();
+}
+function submitTask(){
+  const name=$('wName').value.trim();
+  if(!name || TASKS.some(t=>t.name===name)){ toast('提交失败：任务名称必填且不可重复（V1）','err'); return; }
+  if(!WIZ.details.length){ toast('提交失败：请至少录入一条投放明细','err'); return; }
+  const bad=WIZ.details.filter(d=>d.parse!=='解析成功');
+  if(bad.length){ toast(`提交失败：${bad.length} 条明细未解析成功（V12），请修正后再提交`,'err'); wizGoto(2); return; }
+  const budget=parseFloat($('wBudget').value)||0, sum=WIZ.details.reduce((s,d)=>s+(parseFloat(d.amount)||0),0);
+  if(sum>budget){ toast(`提交失败：实际金额合计超出推广预算（V8）`,'err'); wizGoto(2); return; }
+  if(!wizContractOk()){ toast('提交失败：超出推广合同金额，触发超发护栏（V9）','err'); wizGoto(2); return; }
+  const t=buildTask({trackStatus:'追踪中'});
+  const n=deriveDeliveries(t);
+  TASKS.unshift(t);
+  backTaskList();
+  toast(`任务创建成功：${t.name}　|　已自动派生 ${n} 条投放记录并启动追踪`,'ok');
+  setTimeout(()=>toast(`追踪引擎已启动：按 video_id 抓取，小时快照 60 分钟/次（可配置），日快照每日 00:30 汇总`,'ok'), 900);
+}
+/* ================= 热门歌曲 ================= */
+function renderHot(){
+  $('hotCards').innerHTML = `
+    <div class="stat-card red"><div class="lb">当前热门歌曲</div><div class="vl">${HOT.length}</div></div>
+    <div class="stat-card orange"><div class="lb">今日上榜次数</div><div class="vl">${HOT.reduce((s,h)=>s+h.rankCount,0)}</div></div>
+    <div class="stat-card green"><div class="lb">预警阈值</div><div class="vl">2000</div><div class="dl">点赞增量/账号/小时（配置项）</div></div>
+    <div class="stat-card blue"><div class="lb">已通知业务员</div><div class="vl">4</div><div class="dl">弹窗+站内信</div></div>`;
+  const rows=HOT.slice().sort((a,b)=>b.rankCount-a.rankCount);
+  $('hotTable').innerHTML = `<tr><th>序号</th><th>歌曲名称</th><th>表演者</th><th>点赞量</th><th>收藏量</th><th>评论量</th><th>转发量</th><th>执行账号数</th><th>推广状态</th><th>推广平台</th><th>上榜时间</th><th>上榜次数</th></tr>` +
+    rows.map((h,i)=>`<tr class="clickable">
+      <td>${i+1}<br>${rankArrow(h.rankChange)}</td>
+      <td><span class="link" title="总量：${h.m.map(fmt).join(' / ')}">${SONGS[h.song].name}</span><br><span class="muted">${h.song}</span></td>
+      <td>${SONGS[h.song].performer}</td>
+      ${h.m.map((v,j)=>`<td title="总量见悬浮">${fmt(v)}<br>${arrow(h.inc[j])}</td>`).join('')}
+      <td>${h.accounts}<br>${rankArrow(h.accChange)}</td>
+      <td>${statusBadge(h.status)}</td><td><span class="tag tag-blue">${h.platform}</span></td><td>${h.rankTime}</td>
+      <td><span class="link" onclick="openHotDetail('${h.song}')">${h.rankCount}</span></td></tr>`).join('');
+}
+function openHotDetail(song){
+  $('hotListView').style.display='none'; $('hotDetailView').style.display='block';
+  $('hotDetailTitle').textContent=`${SONGS[song].name}（${song}）上榜详情`;
+  const rows=HOT_DETAIL[song]||[];
+  $('hotDetailTable').innerHTML = `<tr><th>推广平台</th><th>执行账号</th><th>业务员</th><th>上榜时间（小时节点）</th><th>该小时点赞增量</th></tr>` +
+    rows.map(r=>`<tr><td><span class="tag tag-blue">${r[0]}</span></td><td>${r[1]} ${accOf(r[1])?accOf(r[1]).name:''}</td><td>${r[2]}</td><td>${r[3]}</td><td class="up">+${fmt(r[4])}</td></tr>`).join('');
+}
+function backHotList(){ $('hotListView').style.display='block'; $('hotDetailView').style.display='none'; }
+
+/* ================= 基础数据维护 ================= */
+let BIND_EDIT = null;
+function renderAdmin(){
+  $('adminAccTable').innerHTML = `<tr><th>执行账号ID</th><th>账号名</th><th>所属平台</th><th>归属业务员</th><th>粉丝量</th><th>获赞量</th><th>所属地区</th><th>数据来源</th><th>操作</th></tr>` +
+    ACCOUNTS.map(a=>`<tr><td>${a.id}</td><td>${a.name}</td><td><span class="tag tag-blue">${a.platform}</span></td><td>${a.owner}</td>
+    <td>${fmt(a.fans)}</td><td>${fmt(a.likes)}</td><td>${a.region}</td>
+    <td><span class="tag tag-green">业务提供</span><span class="tag tag-cyan">画像=抓取</span></td>
+    <td><span class="link" onclick="toast('编辑账号基础信息')">编辑</span> <span class="link" onclick="openAccount('${a.id}')">画像</span> <span class="link" onclick="toast('删除仅针对错误数据，留操作日志','warn')">删除</span></td></tr>`).join('');
+  const binds = DELIVERIES.filter(d=>!d.tg || d.expired);
+  $('adminBindTable').innerHTML = `<tr><th>投放记录</th><th>歌曲</th><th>执行账号</th><th>采购合同</th><th>推广合同</th><th>业务员</th><th>标记</th><th>操作</th></tr>` +
+    binds.map(d=>`<tr><td>#${d.id}</td><td>${SONGS[d.song].name}</td><td>${d.account}</td>
+    <td>${d.kj?`<span class="link">${d.kj}</span>`:'—'}</td><td>${d.tg?`<span class="link">${d.tg}</span>`:'<span class="muted">未绑定</span>'}</td>
+    <td>${execOfDelivery(d)}</td><td>${d.expired?'<span class="status status-expired">已过期·待绑合同</span>':''}</td>
+    <td><span class="link" onclick="openBindModal(${d.id})">编辑/绑定</span></td></tr>`).join('');
+  $('adminLogTable').innerHTML = `<tr><th>时间</th><th>操作人</th><th>动作</th><th>内容</th></tr>` +
+    LOGS.map(l=>`<tr><td>${l[0]}</td><td>${l[1]}</td><td><span class="tag tag-gray">${l[2]}</span></td><td>${l[3]}</td></tr>`).join('');
+}
+function openBindModal(id){
+  BIND_EDIT=id; const d=DELIVERIES.find(x=>x.id===id);
+  $('modalTitle').textContent=`投放记录 #${id} 绑定/编辑（资管）`;
+  $('modalBody').innerHTML=`
+    <div class="form-row"><label>歌曲</label><input value="${SONGS[d.song].name}（${d.song}）" disabled></div>
+    <div class="form-row"><label>执行账号</label><input value="${d.account} ${accOf(d.account).name}" disabled></div>
+    <div class="form-row"><label>采购合同</label><select id="mKj"><option value="">未绑定</option>${['KJ000001','KJ000002','KJ000003','KJ000004'].map(k=>`<option ${d.kj===k?'selected':''}>${k}</option>`).join('')}</select></div>
+    <div class="form-row"><label>推广合同</label><select id="mTg"><option value="">未绑定</option>${['TG00001','TG00002','TG00003','TG00005','TG00006','TG00009'].map(k=>`<option ${d.tg===k?'selected':''}>${k}</option>`).join('')}</select></div>
+    <div class="form-row"><label>推广业务员</label><select id="mExec">${['张丽君','王小辉','郭媛','韩宇'].map(k=>`<option ${accOf(d.account).owner===k?'selected':''}>${k}</option>`).join('')}</select></div>
+    <div class="info-box orange" style="margin-bottom:0">保存提交后：合同周期回写投放记录与任务；"已过期·待绑合同"标记自动消除；跳转链路（合同详情/个人中心）生效。</div>`;
+  $('modalMask').classList.add('open');
+}
+function saveModal(){
+  const d=DELIVERIES.find(x=>x.id===BIND_EDIT);
+  d.kj=$('mKj').value; d.tg=$('mTg').value;
+  if(d.tg){ d.expired=false; d.period='2024-04-01~2024-04-30'; }
+  accOf(d.account).owner=$('mExec').value;
+  LOGS.unshift([new Date().toLocaleString('zh-CN'),'资管·李资管','绑定',`投放记录#${d.id} 绑定 采购=${d.kj||'—'} 推广=${d.tg||'—'} 业务员=${accOf(d.account).owner}`]);
+  closeModal(); renderAdmin(); toast('保存提交成功：绑定生效，过期标记已消除','ok');
+}
+function closeModal(){ $('modalMask').classList.remove('open'); }
+
+/* ================= 初始化 ================= */
+function initSelects(){
+  const accOpts  = ACCOUNTS.map(a=>`<option value="${a.id}">${a.id} ${a.name}</option>`).join('');
+  const execOpts = ['张丽君','王小辉','郭媛','韩宇'].map(e=>`<option>${e}</option>`).join('');
+  if($('sAcc'))  $('sAcc').innerHTML  += accOpts;
+  if($('sExec')) $('sExec').innerHTML += execOpts;
+  if($('sSongSel')) $('sSongSel').innerHTML = Object.keys(SONGS).filter(id=>!SONGS[id].draft)
+    .map(id=>`<option value="${id}">${SONGS[id].name}（${id}）</option>`).join('');
+}
+initSelects();
+showPage('task');
+</script>
+</body>
+</html>
